@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="3" result="Passed" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2025-01-30 02:02:30Z" end-time="2025-01-30 02:02:36Z" duration="6.1714319">
+  <test-suite type="TestSuite" id="1000" name="Utilities.Async" fullname="Utilities.Async" runstate="Runnable" testcasecount="3" result="Passed" start-time="2025-01-30 02:02:30Z" end-time="2025-01-30 02:02:36Z" duration="6.171432" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <test-suite type="Assembly" id="1003" name="Unity.Addressables.Editor.Tests.DocExampleCode.dll" fullname="/home/runner/work/unity-test-summary/unity-test-summary/com.utilities.async/Utilities.Async/Library/ScriptAssemblies/Unity.Addressables.Editor.Tests.DocExampleCode.dll" runstate="Runnable" testcasecount="1" result="Passed" start-time="2025-01-30 02:02:30Z" end-time="2025-01-30 02:02:30Z" duration="0.100098" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="7342" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestSuite" id="1004" name="AddressableAssets" fullname="AddressableAssets" runstate="Runnable" testcasecount="1" result="Passed" start-time="2025-01-30 02:02:30Z" end-time="2025-01-30 02:02:30Z" duration="0.099700" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1005" name="DocExampleCode" fullname="AddressableAssets.DocExampleCode" runstate="Runnable" testcasecount="1" result="Passed" start-time="2025-01-30 02:02:30Z" end-time="2025-01-30 02:02:30Z" duration="0.099461" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1001" name="TestStub" fullname="AddressableAssets.DocExampleCode.TestStub" classname="AddressableAssets.DocExampleCode.TestStub" runstate="Runnable" testcasecount="1" result="Passed" start-time="2025-01-30 02:02:30Z" end-time="2025-01-30 02:02:30Z" duration="0.098117" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1002" name="RequiredTest" fullname="AddressableAssets.DocExampleCode.TestStub.RequiredTest" methodname="RequiredTest" classname="AddressableAssets.DocExampleCode.TestStub" runstate="Runnable" seed="288982125" result="Passed" start-time="2025-01-30 02:02:30Z" end-time="2025-01-30 02:02:30Z" duration="0.011408" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[
+\u001b[37m
+##utp:{"type":"TestStatus","time":1738202550315,"version":2,"phase":"Begin","processId":7342,"name":"AddressableAssets.DocExampleCode.TestStub.RequiredTest","state":0}\u001b[0m
+
+\u001b[37m
+##utp:{"type":"TestStatus","time":1738202550399,"version":2,"phase":"End","processId":7342,"name":"AddressableAssets.DocExampleCode.TestStub.RequiredTest","state":4,"message":"","duration":11,"durationMicroseconds":11408,"stackTrace":"","fileName":"./Library/PackageCache/com.unity.addressables@4f7e840f4cce/Tests/Editor/DocExampleCode/TestStub.cs","lineNumber":13,"iteration":0}\u001b[0m
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+    <test-suite type="Assembly" id="1012" name="Utilities.Async.Tests.dll" fullname="/home/runner/work/unity-test-summary/unity-test-summary/com.utilities.async/Utilities.Async/Library/ScriptAssemblies/Utilities.Async.Tests.dll" runstate="Runnable" testcasecount="2" result="Passed" start-time="2025-01-30 02:02:30Z" end-time="2025-01-30 02:02:36Z" duration="6.064153" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="7342" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestSuite" id="1013" name="Utilities" fullname="Utilities" runstate="Runnable" testcasecount="2" result="Passed" start-time="2025-01-30 02:02:30Z" end-time="2025-01-30 02:02:36Z" duration="6.063403" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1014" name="Async" fullname="Utilities.Async" runstate="Runnable" testcasecount="2" result="Passed" start-time="2025-01-30 02:02:30Z" end-time="2025-01-30 02:02:36Z" duration="6.063179" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestSuite" id="1015" name="Tests" fullname="Utilities.Async.Tests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2025-01-30 02:02:30Z" end-time="2025-01-30 02:02:36Z" duration="6.062960" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="TestFixture" id="1009" name="TestFixture_01" fullname="Utilities.Async.Tests.TestFixture_01" classname="Utilities.Async.Tests.TestFixture_01" runstate="Runnable" testcasecount="2" result="Passed" start-time="2025-01-30 02:02:30Z" end-time="2025-01-30 02:02:36Z" duration="6.062711" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1010" name="Test_01_IEnumerator" fullname="Utilities.Async.Tests.TestFixture_01.Test_01_IEnumerator" methodname="Test_01_IEnumerator" classname="Utilities.Async.Tests.TestFixture_01" runstate="Runnable" seed="342910327" result="Passed" start-time="2025-01-30 02:02:30Z" end-time="2025-01-30 02:02:33Z" duration="3.039775" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[
+\u001b[37m
+##utp:{"type":"TestStatus","time":1738202550406,"version":2,"phase":"Begin","processId":7342,"name":"Utilities.Async.Tests.TestFixture_01.Test_01_IEnumerator","state":0}\u001b[0m
+
+\u001b[37mTest_02_Async starting...\u001b[0m
+
+\u001b[37mMyFunctionAsync | IsMainThread? True | 1005\u001b[0m
+
+\u001b[37mUnityMainThread | IsMainThread? True | 2019\u001b[0m
+
+\u001b[37mBackgroundInvokedAction | IsMainThread? True\u001b[0m
+
+\u001b[37mMyEnumerableFunction | IsMainThread? True | 3029\u001b[0m
+
+\u001b[37mTest_02_Async Complete!\u001b[0m
+
+\u001b[37m
+##utp:{"type":"TestStatus","time":1738202553455,"version":2,"phase":"End","processId":7342,"name":"Utilities.Async.Tests.TestFixture_01.Test_01_IEnumerator","state":4,"message":"","duration":3040,"durationMicroseconds":3039775,"stackTrace":"","fileName":"./Packages/com.utilities.async/Tests/TestFixture_01.cs","lineNumber":21,"iteration":0}\u001b[0m
+]]></output>
+              </test-case>
+              <test-case id="1011" name="Test_02_Async" fullname="Utilities.Async.Tests.TestFixture_01.Test_02_Async" methodname="Test_02_Async" classname="Utilities.Async.Tests.TestFixture_01" runstate="Runnable" seed="2135797536" result="Passed" start-time="2025-01-30 02:02:33Z" end-time="2025-01-30 02:02:36Z" duration="3.008613" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[
+\u001b[37m
+##utp:{"type":"TestStatus","time":1738202553456,"version":2,"phase":"Begin","processId":7342,"name":"Utilities.Async.Tests.TestFixture_01.Test_02_Async","state":0}\u001b[0m
+
+\u001b[37mTest_02_Async starting...\u001b[0m
+
+\u001b[37mMyFunctionAsync | IsMainThread? True | 1000\u001b[0m
+
+\u001b[37mUnityMainThread | IsMainThread? True | 2001\u001b[0m
+
+\u001b[37mBackgroundInvokedAction | IsMainThread? True\u001b[0m
+
+\u001b[37mMyEnumerableFunction | IsMainThread? True | 3003\u001b[0m
+
+\u001b[37mTest_02_Async Complete!\u001b[0m
+
+\u001b[37m
+##utp:{"type":"TestStatus","time":1738202556467,"version":2,"phase":"End","processId":7342,"name":"Utilities.Async.Tests.TestFixture_01.Test_02_Async","state":4,"message":"","duration":3009,"durationMicroseconds":3008613,"stackTrace":"","fileName":"./Packages/com.utilities.async/Tests/TestFixture_01.cs","lineNumber":28,"iteration":0}\u001b[0m
+
+\u001b[37mSaving results to: /home/runner/work/unity-test-summary/unity-test-summary/Logs/StandaloneLinux64-results.xml\u001b[0m
+]]></output>
+              </test-case>
+            </test-suite>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>
