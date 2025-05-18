@@ -5381,6 +5381,8 @@ Builder.prototype.j2x = function(jObj, level, ajPath) {
       // null attribute should be ignored by the attribute list, but should not cause the tag closing
       if (this.isAttribute(key)) {
         val += '';
+      } else if (key === this.options.cdataPropName) {
+        val += '';
       } else if (key[0] === '?') {
         val += this.indentate(level) + '<' + key + '?' + this.tagEndChar;
       } else {
@@ -6366,7 +6368,7 @@ const replaceEntitiesValue = function(val){
 }
 function saveTextToParentTag(textData, currentNode, jPath, isLeafNode) {
   if (textData) { //store previously collected data as textNode
-    if(isLeafNode === undefined) isLeafNode = Object.keys(currentNode.child).length === 0
+    if(isLeafNode === undefined) isLeafNode = currentNode.child.length === 0
     
     textData = this.parseTextData(textData,
       currentNode.tagname,
@@ -7720,80 +7722,73 @@ function regExpEscape (s) {
 /***/ ((module) => {
 
 const hexRegex = /^[-+]?0x[a-fA-F0-9]+$/;
-const numRegex = /^([\-\+])?(0*)(\.[0-9]+([eE]\-?[0-9]+)?|[0-9]+(\.[0-9]+([eE]\-?[0-9]+)?)?)$/;
-// const octRegex = /0x[a-z0-9]+/;
+const numRegex = /^([\-\+])?(0*)([0-9]*(\.[0-9]*)?)$/;
+// const octRegex = /^0x[a-z0-9]+/;
 // const binRegex = /0x[a-z0-9]+/;
 
-
-//polyfill
-if (!Number.parseInt && window.parseInt) {
-    Number.parseInt = window.parseInt;
-}
-if (!Number.parseFloat && window.parseFloat) {
-    Number.parseFloat = window.parseFloat;
-}
-
-  
+ 
 const consider = {
     hex :  true,
+    // oct: false,
     leadingZeros: true,
     decimalPoint: "\.",
-    eNotation: true
+    eNotation: true,
     //skipLike: /regex/
 };
 
 function toNumber(str, options = {}){
-    // const options = Object.assign({}, consider);
-    // if(opt.leadingZeros === false){
-    //     options.leadingZeros = false;
-    // }else if(opt.hex === false){
-    //     options.hex = false;
-    // }
-
     options = Object.assign({}, consider, options );
     if(!str || typeof str !== "string" ) return str;
     
     let trimmedStr  = str.trim();
-    // if(trimmedStr === "0.0") return 0;
-    // else if(trimmedStr === "+0.0") return 0;
-    // else if(trimmedStr === "-0.0") return -0;
-
+    
     if(options.skipLike !== undefined && options.skipLike.test(trimmedStr)) return str;
+    else if(str==="0") return 0;
     else if (options.hex && hexRegex.test(trimmedStr)) {
-        return Number.parseInt(trimmedStr, 16);
-    // } else if (options.parseOct && octRegex.test(str)) {
+        return parse_int(trimmedStr, 16);
+    // }else if (options.oct && octRegex.test(str)) {
     //     return Number.parseInt(val, 8);
+    }else if (trimmedStr.search(/[eE]/)!== -1) { //eNotation
+        const notation = trimmedStr.match(/^([-\+])?(0*)([0-9]*(\.[0-9]*)?[eE][-\+]?[0-9]+)$/); 
+        // +00.123 => [ , '+', '00', '.123', ..
+        if(notation){
+            // console.log(notation)
+            if(options.leadingZeros){ //accept with leading zeros
+                trimmedStr = (notation[1] || "") + notation[3];
+            }else{
+                if(notation[2] === "0" && notation[3][0]=== "."){ //valid number
+                }else{
+                    return str;
+                }
+            }
+            return options.eNotation ? Number(trimmedStr) : str;
+        }else{
+            return str;
+        }
     // }else if (options.parseBin && binRegex.test(str)) {
     //     return Number.parseInt(val, 2);
     }else{
         //separate negative sign, leading zeros, and rest number
         const match = numRegex.exec(trimmedStr);
+        // +00.123 => [ , '+', '00', '.123', ..
         if(match){
             const sign = match[1];
             const leadingZeros = match[2];
             let numTrimmedByZeros = trimZeros(match[3]); //complete num without leading zeros
             //trim ending zeros for floating number
             
-            const eNotation = match[4] || match[6];
             if(!options.leadingZeros && leadingZeros.length > 0 && sign && trimmedStr[2] !== ".") return str; //-0123
             else if(!options.leadingZeros && leadingZeros.length > 0 && !sign && trimmedStr[1] !== ".") return str; //0123
+            else if(options.leadingZeros && leadingZeros===str) return 0; //00
+            
             else{//no leading zeros or leading zeros are allowed
                 const num = Number(trimmedStr);
                 const numStr = "" + num;
+
                 if(numStr.search(/[eE]/) !== -1){ //given number is long and parsed to eNotation
                     if(options.eNotation) return num;
                     else return str;
-                }else if(eNotation){ //given number has enotation
-                    if(options.eNotation) return num;
-                    else return str;
                 }else if(trimmedStr.indexOf(".") !== -1){ //floating number
-                    // const decimalPart = match[5].substr(1);
-                    // const intPart = trimmedStr.substr(0,trimmedStr.indexOf("."));
-
-                    
-                    // const p = numStr.indexOf(".");
-                    // const givenIntPart = numStr.substr(0,p);
-                    // const givenDecPart = numStr.substr(p+1);
                     if(numStr === "0" && (numTrimmedByZeros === "") ) return num; //0.0
                     else if(numStr === numTrimmedByZeros) return num; //0.456. 0.79000
                     else if( sign && numStr === "-"+numTrimmedByZeros) return num;
@@ -7801,26 +7796,11 @@ function toNumber(str, options = {}){
                 }
                 
                 if(leadingZeros){
-                    // if(numTrimmedByZeros === numStr){
-                    //     if(options.leadingZeros) return num;
-                    //     else return str;
-                    // }else return str;
-                    if(numTrimmedByZeros === numStr) return num;
-                    else if(sign+numTrimmedByZeros === numStr) return num;
-                    else return str;
+                    return (numTrimmedByZeros === numStr) || (sign+numTrimmedByZeros === numStr) ? num : str
+                }else  {
+                    return (trimmedStr === numStr) || (trimmedStr === sign+numStr) ? num : str
                 }
-
-                if(trimmedStr === numStr) return num;
-                else if(trimmedStr === sign+numStr) return num;
-                // else{
-                //     //number with +/- sign
-                //     trimmedStr.test(/[-+][0-9]);
-
-                // }
-                return str;
             }
-            // else if(!eNotation && trimmedStr && trimmedStr !== Number(trimmedStr) ) return str;
-            
         }else{ //non-numeric string
             return str;
         }
@@ -7842,8 +7822,16 @@ function trimZeros(numStr){
     }
     return numStr;
 }
-module.exports = toNumber
 
+function parse_int(numStr, base){
+    //polyfill
+    if(parseInt) return parseInt(numStr, base);
+    else if(Number.parseInt) return Number.parseInt(numStr, base);
+    else if(window && window.parseInt) return window.parseInt(numStr, base);
+    else throw new Error("parseInt, Number.parseInt, window.parseInt are not supported")
+}
+
+module.exports = toNumber;
 
 /***/ }),
 
@@ -13455,7 +13443,7 @@ module.exports = {
 
 
 const { parseSetCookie } = __nccwpck_require__(4408)
-const { stringify, getHeadersList } = __nccwpck_require__(3121)
+const { stringify } = __nccwpck_require__(3121)
 const { webidl } = __nccwpck_require__(1744)
 const { Headers } = __nccwpck_require__(554)
 
@@ -13531,14 +13519,13 @@ function getSetCookies (headers) {
 
   webidl.brandCheck(headers, Headers, { strict: false })
 
-  const cookies = getHeadersList(headers).cookies
+  const cookies = headers.getSetCookie()
 
   if (!cookies) {
     return []
   }
 
-  // In older versions of undici, cookies is a list of name:value.
-  return cookies.map((pair) => parseSetCookie(Array.isArray(pair) ? pair[1] : pair))
+  return cookies.map((pair) => parseSetCookie(pair))
 }
 
 /**
@@ -13966,14 +13953,15 @@ module.exports = {
 /***/ }),
 
 /***/ 3121:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+/***/ ((module) => {
 
 "use strict";
 
 
-const assert = __nccwpck_require__(9491)
-const { kHeadersList } = __nccwpck_require__(2785)
-
+/**
+ * @param {string} value
+ * @returns {boolean}
+ */
 function isCTLExcludingHtab (value) {
   if (value.length === 0) {
     return false
@@ -14234,31 +14222,13 @@ function stringify (cookie) {
   return out.join('; ')
 }
 
-let kHeadersListNode
-
-function getHeadersList (headers) {
-  if (headers[kHeadersList]) {
-    return headers[kHeadersList]
-  }
-
-  if (!kHeadersListNode) {
-    kHeadersListNode = Object.getOwnPropertySymbols(headers).find(
-      (symbol) => symbol.description === 'headers list'
-    )
-
-    assert(kHeadersListNode, 'Headers cannot be parsed')
-  }
-
-  const headersList = headers[kHeadersListNode]
-  assert(headersList)
-
-  return headersList
-}
-
 module.exports = {
   isCTLExcludingHtab,
-  stringify,
-  getHeadersList
+  validateCookieName,
+  validateCookiePath,
+  validateCookieValue,
+  toIMFDate,
+  stringify
 }
 
 
@@ -18262,6 +18232,7 @@ const {
   isValidHeaderName,
   isValidHeaderValue
 } = __nccwpck_require__(2538)
+const util = __nccwpck_require__(3837)
 const { webidl } = __nccwpck_require__(1744)
 const assert = __nccwpck_require__(9491)
 
@@ -18815,6 +18786,9 @@ Object.defineProperties(Headers.prototype, {
   [Symbol.toStringTag]: {
     value: 'Headers',
     configurable: true
+  },
+  [util.inspect.custom]: {
+    enumerable: false
   }
 })
 
@@ -27991,6 +27965,20 @@ class Pool extends PoolBase {
       ? { ...options.interceptors }
       : undefined
     this[kFactory] = factory
+
+    this.on('connectionError', (origin, targets, error) => {
+      // If a connection error occurs, we remove the client from the pool,
+      // and emit a connectionError event. They will not be re-used.
+      // Fixes https://github.com/nodejs/undici/issues/3895
+      for (const target of targets) {
+        // Do not use kRemoveClient here, as it will close the client,
+        // but the client cannot be closed in this state.
+        const idx = this[kClients].indexOf(target)
+        if (idx !== -1) {
+          this[kClients].splice(idx, 1)
+        }
+      }
+    })
   }
 
   [kGetDispatcher] () {
