@@ -1,6 +1,6 @@
 {
   "name": "unity-test-summary",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A GitHub action to gather and display Unit Tests from the Unity Game Engine.",
   "author": "Buildalon",
   "license": "MIT",
@@ -15,18 +15,18 @@
   "main": "dist/index.js",
   "keywords": [],
   "dependencies": {
-    "@actions/core": "^1.10.1",
+    "@actions/core": "^1.11.1",
     "@actions/glob": "^0.5.0",
-    "fast-xml-parser": "^4.5.1"
+    "fast-xml-parser": "^4.5.3"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.13",
-    "@types/node": "^22.2.0",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.15.18",
     "@vercel/ncc": "^0.34.0",
     "shx": "^0.3.4",
-    "ts-jest": "^29.2.5",
+    "ts-jest": "^29.3.4",
     "ts-node": "^10.9.2",
-    "typescript": "^5.5.4"
+    "typescript": "^5.8.3"
   },
   "scripts": {
     "build": "npm run clean && npm run bundle",
