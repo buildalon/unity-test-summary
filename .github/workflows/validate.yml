@@ -1,13 +1,10 @@
 name: validate
 on:
   push:
-    branches:
-      - 'main'
+    branches: ['main']
   pull_request:
-    branches:
-      - '**'
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
+    branches: ['**']
+  workflow_dispatch: # Allows you to run this workflow manually from the Actions tab
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -40,32 +37,32 @@ jobs:
             unity-version: 6000.x
             build-target: StandaloneOSX
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
+      - uses: actions/checkout@v5
         with:
           repository: RageAgainstThePixel/com.utilities.async
           path: com.utilities.async
-      - uses: buildalon/unity-setup@v1
+      - uses: buildalon/unity-setup@main
         with:
           unity-version: ${{ matrix.unity-version }}
           build-targets: ${{ matrix.build-target }}
           version-file: ${{ github.workspace }}/com.utilities.async/Utilities.Async/ProjectSettings/ProjectVersion.txt
-      - uses: buildalon/activate-unity-license@v1
+      - uses: buildalon/activate-unity-license@main
         with:
           license: 'Personal'
           username: ${{ secrets.UNITY_USERNAME }}
           password: ${{ secrets.UNITY_PASSWORD }}
-      - uses: buildalon/unity-action@v1
-        name: '${{ matrix.build-target }}-Validate'
+      - uses: buildalon/unity-action@main
+        name: ${{ matrix.build-target }}-Validate
         with:
-          log-name: '${{ matrix.build-target }}-Validate'
-          args: '-quit -nographics -batchmode -executeMethod Utilities.Editor.BuildPipeline.UnityPlayerBuildTools.ValidateProject -importTMProEssentialsAsset'
-      - uses: buildalon/unity-action@v1
-        name: '${{ matrix.build-target }}-Test'
+          log-name: ${{ matrix.build-target }}-Validate
+          args: -quit -nographics -batchmode -executeMethod Utilities.Editor.BuildPipeline.UnityPlayerBuildTools.ValidateProject -importTMProEssentialsAsset
+      - uses: buildalon/unity-action@main
+        name: ${{ matrix.build-target }}-Test
         with:
-          log-name: '${{ matrix.build-target }}-Test'
+          log-name: ${{ matrix.build-target }}-Test
           build-target: ${{ matrix.build-target }}
-          args: '-nographics -batchmode -runTests -testPlatform EditMode -testResults "${{ github.workspace }}/Logs/${{ matrix.build-target }}-results.xml"'
+          args: -nographics -batchmode -runTests -testPlatform EditMode -testResults "${{ github.workspace }}/Logs/${{ matrix.build-target }}-results.xml"
       - uses: actions/upload-artifact@v4
         if: success() || failure()
         with:
