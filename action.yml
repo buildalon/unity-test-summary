@@ -1,12 +1,12 @@
 name: Buildalon unity-test-summary
 description: 'A GitHub action to gather and display Unit Tests from the Unity Game Engine.'
 branding:
-  icon: 'list'
-  color: 'red'
+  icon: list
+  color: red
 inputs:
   test-results:
     description: 'The path to the test results file(s).'
     required: true
 runs:
-  using: 'node20'
-  main: 'dist/index.js'
+  using: node20
+  main: dist/index.js
