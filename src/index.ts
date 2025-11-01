@@ -144,11 +144,11 @@ function getTestCaseDetails(testCase: any): string {
   let details = `\n\n`;
   if (failure) {
     details += `\`\`\`error\n`;
-    const failureMessage = (failure['message'] as string).trim();
+    const failureMessage = (failure['message'] as string)?.trim();
     if (failureMessage && failureMessage !== '') {
       details += `${failure['message']}\n`;
     }
-    const stackTrace = (failure['stack-trace'] as string).trim();
+    const stackTrace = (failure['stack-trace'] as string)?.trim();
     if (stackTrace && stackTrace !== '') {
       details += `${stackTrace}\n`;
     }
