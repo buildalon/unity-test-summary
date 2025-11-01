@@ -1,6 +1,6 @@
 {
   "name": "unity-test-summary",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "description": "A GitHub action to gather and display Unit Tests from the Unity Game Engine.",
   "author": "Buildalon",
   "license": "MIT",

@@ -1,77 +1,53 @@
 name: validate
 on:
+  schedule:
+    - cron: '0 0 * * 0' # Every Sunday at midnight
   push:
     branches: ['main']
   pull_request:
-    branches: ['**']
-  workflow_dispatch: # Allows you to run this workflow manually from the Actions tab
+    branches: ['*']
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  validate:
-    runs-on: ${{ matrix.os }}
+  setup:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
     permissions:
       contents: read
-      actions: write
-    strategy:
-      fail-fast: false
-      matrix:
-        include: # for each os specify the build targets
-          - os: ubuntu-latest
-            unity-version: 2022.x
-            build-target: StandaloneLinux64
-          - os: ubuntu-latest
-            unity-version: 6000.x
-            build-target: StandaloneLinux64
-          - os: windows-latest
-            unity-version: 2022.x
-            build-target: StandaloneWindows64
-          - os: windows-latest
-            unity-version: 6000.x
-            build-target: StandaloneWindows64
-          - os: macos-latest
-            unity-version: 2022.x
-            build-target: StandaloneOSX
-          - os: macos-latest
-            unity-version: 6000.x
-            build-target: StandaloneOSX
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/checkout@v5
         with:
-          repository: RageAgainstThePixel/com.utilities.async
-          path: com.utilities.async
-      - uses: buildalon/unity-setup@main
+          sparse-checkout: .github/
+      - uses: RageAgainstThePixel/job-builder@v1
+        id: setup-jobs
         with:
-          unity-version: ${{ matrix.unity-version }}
-          build-targets: ${{ matrix.build-target }}
-          version-file: ${{ github.workspace }}/com.utilities.async/Utilities.Async/ProjectSettings/ProjectVersion.txt
-      - uses: buildalon/activate-unity-license@main
-        with:
-          license: 'Personal'
-          username: ${{ secrets.UNITY_USERNAME }}
-          password: ${{ secrets.UNITY_PASSWORD }}
-      - uses: buildalon/unity-action@main
-        name: ${{ matrix.build-target }}-Validate
-        with:
-          log-name: ${{ matrix.build-target }}-Validate
-          args: -quit -nographics -batchmode -executeMethod Utilities.Editor.BuildPipeline.UnityPlayerBuildTools.ValidateProject -importTMProEssentialsAsset
-      - uses: buildalon/unity-action@main
-        name: ${{ matrix.build-target }}-Test
-        with:
-          log-name: ${{ matrix.build-target }}-Test
-          build-target: ${{ matrix.build-target }}
-          args: -nographics -batchmode -runTests -testPlatform EditMode -testResults "${{ github.workspace }}/Logs/${{ matrix.build-target }}-results.xml"
-      - uses: actions/upload-artifact@v4
-        if: success() || failure()
-        with:
-          compression-level: 0
-          retention-days: 1
-          name: '${{ github.run_number }}.${{ github.run_attempt }}-${{ matrix.os }}-${{ matrix.unity-version }}-${{ matrix.build-target }}-Artifacts'
-          path: |
-            ${{ github.workspace }}/**/*.log
-      - uses: ./ # buildalon/unity-test-summary
-        if: success() || failure()
-        with:
-          test-results: ${{ github.workspace }}/Logs/*-results.xml
+          build-options: ./.github/workflows/build-options.json
+          group-by: 'unity-version'
+    outputs:
+      jobs: ${{ steps.setup-jobs.outputs.jobs }}
+  validate:
+    if: ${{ needs.setup.outputs.jobs }}
+    needs: setup
+    name: build ${{ matrix.jobs.name }}
+    permissions:
+      contents: read
+    strategy:
+      matrix: ${{ fromJSON(needs.setup.outputs.jobs) }}
+      fail-fast: false
+      max-parallel: 1
+    secrets: inherit
+    uses: ./.github/workflows/build.yml
+    with:
+      matrix: ${{ toJSON(matrix.jobs.matrix) }}
+  timeline:
+    needs: [setup, validate]
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: Kesin11/actions-timeline@c2f474758e8e9ac6f37ec64a6442dead7fd1dad2 # v2.2.5
+        continue-on-error: true

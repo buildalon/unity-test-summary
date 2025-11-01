@@ -30318,14 +30318,15 @@ function parseUtp(output) {
     return objs;
 }
 function parseLogs(output) {
+    var _a;
     const logs = [];
     const lines = output.split('\n');
     for (let line of lines) {
         if (line.match(/##utp:/)) {
             continue;
         }
-        line = line.replace(/\\u001b\[[0-9]*m/g, '').trim();
-        if (line === '' || line.startsWith('Saving results to:')) {
+        line = (_a = line.replace(/\\u001b\[[0-9]*m/g, '')) === null || _a === void 0 ? void 0 : _a.trim();
+        if (!line || line === '' || line.startsWith('Saving results to:')) {
             continue;
         }
         logs.push(line);
@@ -32381,6 +32382,7 @@ function getTestSuiteDetails(testSuite) {
     return details;
 }
 function getTestCaseDetails(testCase) {
+    var _a, _b;
     const testCaseFullName = testCase['fullname'];
     const testCaseResult = testCase['result'];
     const testCaseResultIcon = testCaseResult === 'Passed' ? '✅' : '❌';
@@ -32388,11 +32390,11 @@ function getTestCaseDetails(testCase) {
     let details = `\n\n`;
     if (failure) {
         details += `\`\`\`error\n`;
-        const failureMessage = failure['message'].trim();
+        const failureMessage = (_a = failure['message']) === null || _a === void 0 ? void 0 : _a.trim();
         if (failureMessage && failureMessage !== '') {
             details += `${failure['message']}\n`;
         }
-        const stackTrace = failure['stack-trace'].trim();
+        const stackTrace = (_b = failure['stack-trace']) === null || _b === void 0 ? void 0 : _b.trim();
         if (stackTrace && stackTrace !== '') {
             details += `${stackTrace}\n`;
         }

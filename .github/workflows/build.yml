@@ -1,0 +1,68 @@
+name: build
+permissions:
+  contents: read
+on:
+  workflow_call:
+    inputs:
+      matrix:
+        required: true
+        type: string
+    secrets:
+      UNITY_USERNAME:
+        required: true
+      UNITY_PASSWORD:
+        required: true
+jobs:
+  build:
+    name: ${{ matrix.name }}
+    strategy:
+      matrix: ${{ fromJSON(inputs.matrix) }}
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+    steps:
+      - name: Free Disk Space
+        if: ${{ matrix.os == 'ubuntu-latest' && matrix.unity-version == '6000.2' }}
+        uses: endersonmenezes/free-disk-space@713d134e243b926eba4a5cce0cf608bfd1efb89a # v2.1.1
+        with:
+          remove_android: true
+          remove_dotnet: false
+      - uses: actions/checkout@v5
+      - uses: actions/checkout@v5
+        with:
+          repository: RageAgainstThePixel/com.utilities.async
+          path: com.utilities.async
+      - uses: buildalon/unity-setup@main
+        with:
+          unity-version: ${{ matrix.unity-version }}
+          build-targets: ${{ matrix.build-target }}
+          version-file: ${{ github.workspace }}/com.utilities.async/Utilities.Async/ProjectSettings/ProjectVersion.txt
+      - uses: buildalon/activate-unity-license@main
+        with:
+          license: 'Personal'
+          username: ${{ secrets.UNITY_USERNAME }}
+          password: ${{ secrets.UNITY_PASSWORD }}
+      - uses: buildalon/unity-action@main
+        name: ${{ matrix.build-target }}-Validate
+        with:
+          log-name: ${{ matrix.build-target }}-Validate
+          args: -quit -nographics -batchmode -executeMethod Utilities.Editor.BuildPipeline.UnityPlayerBuildTools.ValidateProject -importTMProEssentialsAsset
+      - uses: buildalon/unity-action@main
+        name: ${{ matrix.build-target }}-Test
+        with:
+          log-name: ${{ matrix.build-target }}-Test
+          build-target: ${{ matrix.build-target }}
+          args: -nographics -batchmode -runTests -testPlatform EditMode -testResults "${{ github.workspace }}/Logs/${{ matrix.build-target }}-results.xml"
+      - uses: actions/upload-artifact@v4
+        if: success() || failure()
+        with:
+          compression-level: 0
+          retention-days: 1
+          name: '${{ github.run_number }}.${{ github.run_attempt }}-${{ matrix.os }}-${{ matrix.unity-version }}-${{ matrix.build-target }}-Artifacts'
+          path: |
+            ${{ github.workspace }}/**/*.log
+      - uses: ./ # buildalon/unity-test-summary
+        if: success() || failure()
+        with:
+          test-results: ${{ github.workspace }}/Logs/*-results.xml
