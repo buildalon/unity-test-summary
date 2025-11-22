@@ -8,5 +8,5 @@ inputs:
     description: 'The path to the test results file(s).'
     required: true
 runs:
-  using: node20
+  using: node24
   main: dist/index.js

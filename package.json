@@ -1,6 +1,6 @@
 {
   "name": "unity-test-summary",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "A GitHub action to gather and display Unit Tests from the Unity Game Engine.",
   "author": "Buildalon",
   "license": "MIT",
@@ -21,7 +21,7 @@
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",
-    "@types/node": "^22.18.13",
+    "@types/node": "^22.19.1",
     "@vercel/ncc": "^0.34.0",
     "shx": "^0.3.4",
     "ts-jest": "^29.4.5",
