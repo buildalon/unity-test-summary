@@ -18,3 +18,4 @@ steps:
 | name | description | required |
 | ---- | ----------- | -------- |
 | `test-results` | The path to the test results file(s). | true |
+

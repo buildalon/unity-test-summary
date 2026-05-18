@@ -1,6 +1,6 @@
 {
   "name": "unity-test-summary",
-  "version": "1.0.6",
+  "version": "1.1.0",
   "description": "A GitHub action to gather and display Unit Tests from the Unity Game Engine.",
   "author": "Buildalon",
   "license": "MIT",
@@ -16,15 +16,15 @@
   "keywords": [],
   "dependencies": {
     "@actions/core": "^1.11.1",
-    "@actions/glob": "^0.5.0",
-    "fast-xml-parser": "^4.5.3"
+    "@actions/glob": "^0.5.1",
+    "fast-xml-parser": "^5.8.0"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.14",
-    "@types/node": "^22.19.1",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.12.4",
     "@vercel/ncc": "^0.34.0",
-    "shx": "^0.3.4",
-    "ts-jest": "^29.4.5",
+    "shx": "^0.4.0",
+    "ts-jest": "^29.4.9",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   },
@@ -33,5 +33,8 @@
     "bundle": "ncc build src/index.ts -o dist --source-map --license licenses.txt",
     "clean": "npm install && shx rm -rf dist/ out/ node_modules/ && npm ci",
     "test": "jest"
+  },
+  "overrides": {
+    "@actions/http-client": "^3.0.2"
   }
 }
