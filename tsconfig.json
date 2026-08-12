@@ -10,6 +10,7 @@
     "forceConsistentCasingInFileNames": true,
     "outDir": "dist",
     "declaration": false,
+    "noEmit": true
   },
   "compileOnSave": true,
   "include": [
@@ -17,6 +18,6 @@
   ],
   "exclude": [
     "src/**/*.spec.ts",
-    "tests/**/*.ts",
+    "tests/**/*.ts"
   ]
 }

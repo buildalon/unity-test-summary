@@ -14,11 +14,11 @@ concurrency:
 jobs:
   setup:
     if: github.event.pull_request.draft == false
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           sparse-checkout: .github/
       - uses: RageAgainstThePixel/job-builder@v1
@@ -45,7 +45,7 @@ jobs:
   timeline:
     needs: [setup, validate]
     if: always()
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     permissions:
       contents: read
     steps:
