@@ -59,6 +59,8 @@ jobs:
           build-targets: ${{ matrix.build-target }}
           version-file: ${{ github.workspace }}/com.utilities.async/Utilities.Async/ProjectSettings/ProjectVersion.txt
           allow-security-alert: ${{ inputs.allow-security-alert }}
+          # the streams include the beta and alpha, which only have prereleases until they ship
+          channels: f,b,a
       # macOS and Linux runners all report the same machine identity to Unity, so the license the license job activated
       # once for this run serves every macOS or Linux row; it arrives as an encrypted artifact and is never returned.
       # Without it, or when it no longer fits this machine, the row activates with the account. Windows runners are a
