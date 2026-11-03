@@ -1,5 +1,5 @@
-import core = require('@actions/core');
-import glob = require('@actions/glob');
+import * as core from '@actions/core';
+import * as glob from '@actions/glob';
 import {
   parseTestResults,
   parseUtp,

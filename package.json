@@ -1,6 +1,6 @@
 {
   "name": "unity-test-summary",
-  "version": "1.0.6",
+  "version": "2.0.0",
   "description": "A GitHub action to gather and display Unit Tests from the Unity Game Engine.",
   "author": "Buildalon",
   "license": "MIT",
@@ -15,23 +15,29 @@
   "main": "dist/index.js",
   "keywords": [],
   "dependencies": {
-    "@actions/core": "^1.11.1",
-    "@actions/glob": "^0.5.0",
-    "fast-xml-parser": "^4.5.3"
+    "@actions/core": "^3.0.1",
+    "@actions/glob": "^0.7.0",
+    "fast-xml-parser": "^5.11.2"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.14",
-    "@types/node": "^22.19.1",
-    "@vercel/ncc": "^0.34.0",
-    "shx": "^0.3.4",
-    "ts-jest": "^29.4.5",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.19.2",
+    "@vercel/ncc": "^0.45.0",
+    "jest": "^30.5.2",
+    "shx": "^0.4.0",
+    "ts-jest": "^29.4.15",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.3"
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "npm run clean && npm run bundle",
     "bundle": "ncc build src/index.ts -o dist --source-map --license licenses.txt",
     "clean": "npm install && shx rm -rf dist/ out/ node_modules/ && npm ci",
     "test": "jest"
+  },
+  "overrides": {
+    "@actions/glob": {
+      "minimatch": "^11.0.3"
+    }
   }
 }
