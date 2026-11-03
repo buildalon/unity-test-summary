@@ -17,7 +17,7 @@
   "dependencies": {
     "@actions/core": "^1.11.1",
     "@actions/glob": "^0.5.0",
-    "fast-xml-parser": "^4.5.3"
+    "fast-xml-parser": "^5.7.0"
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",
