@@ -26,7 +26,7 @@ steps:
 
 | Input | Description | Required | Default |
 |-------|-------------|----------|---------|
-| `test-results` | The path to the test results file(s). Accepts a [glob pattern](https://github.com/actions/toolkit/tree/main/packages/glob#patterns) to gather the NUnit XML results of several test runs. | true | |
+| `test-results` | The path to the test results file(s). Accepts glob patterns, one per line, with `!` to exclude, to gather the NUnit XML results of several test runs. | true | |
 
 The action has no outputs. Annotations for failed tests are made relative to the workspace using `UNITY_PROJECT_PATH`, which [unity-setup](https://github.com/buildalon/unity-setup) sets.
 

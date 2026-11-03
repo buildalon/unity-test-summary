@@ -1,5 +1,5 @@
 import * as core from '@actions/core';
-import * as glob from '@actions/glob';
+import * as glob from './glob';
 import {
   parseTestResults,
   parseUtp,
