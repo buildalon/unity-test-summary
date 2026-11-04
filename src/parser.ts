@@ -15,6 +15,8 @@ export async function parseTestResults(file: string): Promise<any> {
   const parser = new XMLParser({
     attributeNamePrefix: ``,
     ignoreAttributes: false,
+    parseAttributeValue: false,
+    parseTagValue: true,
   });
   const obj = parser.parse(contents);
   const testJson = JSON.stringify(obj['test-run'], null, 2);
