@@ -45120,7 +45120,7 @@ function truncateBody(body, maxLength) {
 }
 function testCaseSection(summary, body, isOpen) {
     if (!body || body.trim() === '') {
-        return `\n\n${summary}\n\n`;
+        return `\n\n&emsp;${summary}\n\n`;
     }
     return foldoutSection(summary, body, isOpen);
 }

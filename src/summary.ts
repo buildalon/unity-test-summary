@@ -87,7 +87,8 @@ export function truncateBody(body: string, maxLength: number): string {
  */
 export function testCaseSection(summary: string, body: string, isOpen: boolean): string {
   if (!body || body.trim() === '') {
-    return `\n\n${summary}\n\n`;
+    // an em space stands in for the foldout arrow, so plain lines line up with the foldouts
+    return `\n\n&emsp;${summary}\n\n`;
   }
   return foldoutSection(summary, body, isOpen);
 }

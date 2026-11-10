@@ -4,8 +4,8 @@ import { jobSummarySection, TRUNCATED_MARKER, type TestCaseSection, buildCheckOu
 import { parseLogs, parseTestResults } from '../src/parser.ts';
 
 test('testCaseSection renders a test without output as a plain line', () => {
-  assert.equal(testCaseSection('✅ A.Test (0.01s)', '\n\n', false), '\n\n✅ A.Test (0.01s)\n\n');
-  assert.equal(testCaseSection('✅ A.Test (0.01s)', '', false), '\n\n✅ A.Test (0.01s)\n\n');
+  assert.equal(testCaseSection('✅ A.Test (0.01s)', '\n\n', false), '\n\n&emsp;✅ A.Test (0.01s)\n\n');
+  assert.equal(testCaseSection('✅ A.Test (0.01s)', '', false), '\n\n&emsp;✅ A.Test (0.01s)\n\n');
 });
 
 test('testCaseSection renders a test with output as a foldout', () => {
@@ -52,7 +52,7 @@ test('buildCheckOutput tier 2 shows passing tests as plain lines without output'
   assert.ok(output.length < full.length);
   assert.ok(output.startsWith(header));
   for (let i = 0; i < 20; i++) {
-    assert.ok(output.includes(`\n\n✅ Pass.${i} (0.1s)\n\n`));
+    assert.ok(output.includes(`\n\n&emsp;✅ Pass.${i} (0.1s)\n\n`));
   }
   assert.ok(!output.includes('xxxx'));
   assert.match(output, /<details open>\n<summary>❌ Fail.1 \(0.1s\)<\/summary>\n\n\n```error\nboom/);
