@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import * as assert from 'node:assert/strict';
-import { TRUNCATED_MARKER, type TestCaseSection, buildCheckOutput, foldoutSection, testCaseSection, truncateBody } from '../src/summary.ts';
+import { jobSummarySection, TRUNCATED_MARKER, type TestCaseSection, buildCheckOutput, foldoutSection, testCaseSection, truncateBody } from '../src/summary.ts';
 import { parseLogs, parseTestResults } from '../src/parser.ts';
 
 test('testCaseSection renders a test without output as a plain line', () => {
@@ -100,4 +100,11 @@ test('truncateBody closes a code fence the cut leaves open', () => {
   assert.equal(truncateBody('```log\nabcdef\n```\n', 10), '```log\nabc\n```');
   assert.equal(truncateBody('plain text here', 5), 'plain');
   assert.equal(truncateBody('short', 50), 'short');
+});
+test('jobSummarySection keeps the counts table and links a posted check run', () => {
+  const check = { name: 'Unity Test Results (EditMode-results)', url: 'https://github.com/o/r/runs/1' };
+  assert.equal(jobSummarySection('| 3 | Total |\n\n', 'FULL', check),
+    '| 3 | Total |\n\nSee [Unity Test Results (EditMode-results)](https://github.com/o/r/runs/1) for the tests.\n\n');
+  // without a posted check run the job summary has every test
+  assert.equal(jobSummarySection('| 3 | Total |\n\n', 'FULL'), 'FULL');
 });

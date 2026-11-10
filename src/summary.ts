@@ -103,3 +103,14 @@ export function foldoutSection(summary: string, body: string, isOpen: boolean): 
   const open = isOpen ? ' open' : '';
   return `<details${open}>\n<summary>${summary}</summary>\n\n${body}\n</details>`;
 }
+
+/**
+ * The job summary of a test run. When its check run was posted, the check run has the test details, so the job
+ * summary keeps the counts table and links the check; otherwise it shows everything.
+ * @param header The counts table of the test run
+ * @param full The counts table and every test
+ * @param check The posted check run
+ */
+export function jobSummarySection(header: string, full: string, check?: { name: string; url: string }): string {
+  return check ? `${header}See [${check.name}](${check.url}) for the tests.\n\n` : full;
+}

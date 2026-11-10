@@ -25,6 +25,7 @@ import {
 import {
   TestCaseSection,
   buildCheckOutput,
+  jobSummarySection,
   renderSection,
 } from './summary';
 import {
@@ -42,6 +43,10 @@ interface TestRunSummary {
   sections: TestCaseSection[];
   failures: TestFailure[];
   stats: RunStats;
+  /** The full job summary of the test run */
+  markdown: string;
+  /** The check run, once posted */
+  check?: { name: string; url: string };
 }
 
 /** Where failure locations link to, or undefined when the repository files are unknown. */
@@ -76,8 +81,15 @@ const main = async () => {
     }
     fileLinkContext = getFileLinkContext();
     const summaries = printTestSummary(testResults);
-    await core.summary.write();
-    await postCheckRuns(summaries);
+    try {
+      await postCheckRuns(summaries);
+    } finally {
+      // a test run with a posted check run gets its counts table here and a link to the check
+      for (const summary of summaries) {
+        core.summary.addRaw(jobSummarySection(summary.header, summary.markdown, summary.check));
+      }
+      await core.summary.write();
+    }
   } catch (error) {
     core.setFailed(error);
   }
@@ -149,6 +161,9 @@ async function postCheckRuns(summaries: TestRunSummary[]) {
         detailsUrl,
       });
       checkUrl = htmlUrl;
+      if (htmlUrl) {
+        summary.check = { name, url: htmlUrl };
+      }
       core.info(`Posted check run "${name}" (${id}) on ${headSha} with ${annotations.length} annotations.`);
     } catch (error) {
       if (isPermissionError(error)) {
@@ -274,8 +289,7 @@ function printTestSummary(testResults: { file: string; testRun: any }[]): TestRu
     }
     // the job summary keeps every test in order; the check run fits its output limit
     markdown += sections.map(renderSection).join('');
-    core.summary.addRaw(markdown);
-    summaries.push({ file, testRun, header, sections, failures, stats: getRunStats(testRun) });
+    summaries.push({ file, testRun, header, markdown, sections, failures, stats: getRunStats(testRun) });
   }
   return summaries;
 }

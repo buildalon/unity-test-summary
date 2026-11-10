@@ -31026,7 +31026,7 @@ const _summary = new Summary();
  * @deprecated use `core.summary`
  */
 const markdownSummary = (/* unused pure expression or super */ null && (_summary));
-const summary = _summary;
+const summary_summary = _summary;
 //# sourceMappingURL=summary.js.map
 ;// CONCATENATED MODULE: ./node_modules/@actions/core/lib/path-utils.js
 
@@ -45128,6 +45128,9 @@ function foldoutSection(summary, body, isOpen) {
     const open = isOpen ? ' open' : '';
     return `<details${open}>\n<summary>${summary}</summary>\n\n${body}\n</details>`;
 }
+function jobSummarySection(header, full, check) {
+    return check ? `${header}See [${check.name}](${check.url}) for the tests.\n\n` : full;
+}
 
 ;// CONCATENATED MODULE: ./src/stats.ts
 const DIGIT_SPACE = ' ';
@@ -45254,7 +45257,7 @@ const main = async () => {
     try {
         const testResultsInput = getInput('test-results');
         info(`Gathering Test Results...`);
-        summary.addHeading(`Test Results Summary`);
+        summary_summary.addHeading(`Test Results Summary`);
         info(`test-results:\n  > ${testResultsInput}`);
         const globber = await create(testResultsInput);
         const testResultFiles = await globber.glob();
@@ -45280,8 +45283,15 @@ const main = async () => {
         }
         fileLinkContext = getFileLinkContext();
         const summaries = printTestSummary(testResults);
-        await summary.write();
-        await postCheckRuns(summaries);
+        try {
+            await postCheckRuns(summaries);
+        }
+        finally {
+            for (const summary of summaries) {
+                summary_summary.addRaw(jobSummarySection(summary.header, summary.markdown, summary.check));
+            }
+            await summary_summary.write();
+        }
     }
     catch (error) {
         setFailed(error);
@@ -45340,6 +45350,9 @@ async function postCheckRuns(summaries) {
                 detailsUrl,
             });
             checkUrl = htmlUrl;
+            if (htmlUrl) {
+                summary.check = { name, url: htmlUrl };
+            }
             info(`Posted check run "${name}" (${id}) on ${headSha} with ${annotations.length} annotations.`);
         }
         catch (error) {
@@ -45450,8 +45463,7 @@ function printTestSummary(testResults) {
             getTestSuiteDetails(testSuite, sections, failures);
         }
         markdown += sections.map(renderSection).join('');
-        summary.addRaw(markdown);
-        summaries.push({ file, testRun, header, sections, failures, stats: getRunStats(testRun) });
+        summaries.push({ file, testRun, header, markdown, sections, failures, stats: getRunStats(testRun) });
     }
     return summaries;
 }
