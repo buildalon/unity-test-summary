@@ -7,62 +7,125 @@ on:
       matrix:
         required: true
         type: string
+      allow-security-alert:
+        required: false
+        type: boolean
+        default: false
     secrets:
       UNITY_USERNAME:
         required: true
       UNITY_PASSWORD:
         required: true
+      CI_TOKEN:
+        description: Keys the encrypted run license that macOS and Linux rows activate from.
+        required: false
 jobs:
   build:
-    name: ${{ matrix.name }}
+    # rows are grouped by editor version, so the name carries the OS and target
+    name: ${{ matrix.os }} ${{ matrix.build-target }}
     strategy:
       matrix: ${{ fromJSON(inputs.matrix) }}
       fail-fast: false
+    continue-on-error: ${{ matrix.prerelease == true }}
     runs-on: ${{ matrix.os }}
+    # a hung editor or licensing call must not hold the matrix; rows that install the Android module and its SDK get more
+    timeout-minutes: ${{ matrix.build-target == 'Android' && 60 || 45 }}
     permissions:
       contents: read
+      checks: write # unity-test-summary posts a check run per test run
+    defaults:
+      run:
+        shell: bash
     steps:
+      # runs alongside checkout; the wait before the editor install joins it
       - name: Free Disk Space
+        id: free-disk-space
+        background: true
         if: ${{ matrix.os == 'ubuntu-latest' }}
-        uses: endersonmenezes/free-disk-space@713d134e243b926eba4a5cce0cf608bfd1efb89a # v2.1.1
+        uses: endersonmenezes/free-disk-space@8b8cd4e2277836962939a8f3b4ea0ee4bc006156 # v4.0.1
         with:
           remove_android: true
           remove_dotnet: false
-      - uses: actions/checkout@v5
-      - uses: actions/checkout@v5
+          remove_tool_cache: false
+      - uses: actions/checkout@v7 # checkout self
+      - uses: actions/checkout@v7 # checkout async test repo
         with:
           repository: RageAgainstThePixel/com.utilities.async
+          # TODO: drop this pin for the released version once com.utilities.async v3.1.1 ships its test race fix
+          ref: ec3437fa2d33eef1255d1b75655f729936e373ec # dev/v3.1.1
           path: com.utilities.async
-      - uses: buildalon/unity-setup@main
+      - name: Wait for Free Disk Space
+        wait: free-disk-space
+      - uses: buildalon/unity-setup@v3
+        timeout-minutes: 30
         with:
           unity-version: ${{ matrix.unity-version }}
           build-targets: ${{ matrix.build-target }}
           version-file: ${{ github.workspace }}/com.utilities.async/Utilities.Async/ProjectSettings/ProjectVersion.txt
-      - uses: buildalon/activate-unity-license@main
+          allow-security-alert: ${{ inputs.allow-security-alert }}
+          # the streams include the beta and alpha, which only have prereleases until they ship
+          channels: f,b,a
+      # macOS and Linux runners all report the same machine identity to Unity, so the license the license job activated
+      # once for this run serves every macOS or Linux row; it arrives as an encrypted artifact and is never returned.
+      # Without it, or when it no longer fits this machine, the row activates with the account. Windows runners are a
+      # new machine every job, so Windows rows activate with the account and return the license.
+      - name: Download run license
+        id: download-run-license
+        if: ${{ runner.os != 'Windows' }}
+        continue-on-error: true
+        uses: actions/download-artifact@v8
         with:
-          license: 'Personal'
+          name: unity-license-${{ runner.os }}
+          path: ${{ runner.temp }}/unity-license
+      - name: Decrypt run license
+        id: run-license
+        if: ${{ steps.download-run-license.outcome == 'success' }}
+        continue-on-error: true
+        env:
+          CI_TOKEN: ${{ secrets.CI_TOKEN }}
+        run: |
+          set -euo pipefail
+          dir="${RUNNER_TEMP}/unity-license"
+          license="${dir}/Unity_lic.ulf"
+          # the key never reaches a command line: openssl reads it from the environment
+          export LICENSE_KEY="${CI_TOKEN}:${GITHUB_RUN_ID}"
+          if ! openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 -in "${dir}/unity-license.enc" -out "${license}" -pass env:LICENSE_KEY; then
+            echo 'Could not decrypt the run license' >&2
+            exit 1
+          fi
+          echo "path=${license}" >> "${GITHUB_OUTPUT}"
+      # activates from UNITY_LICENSE before signing in; the post step skips the return on GitHub-hosted macOS and Linux
+      - uses: buildalon/activate-unity-license@v3
+        env:
+          UNITY_LICENSE: ${{ steps.run-license.outputs.path }}
+        with:
+          license: Personal
           username: ${{ secrets.UNITY_USERNAME }}
           password: ${{ secrets.UNITY_PASSWORD }}
-      - uses: buildalon/unity-action@main
+      - name: Remove run license
+        if: ${{ always() && steps.download-run-license.outcome == 'success' }}
+        run: rm -rf "${RUNNER_TEMP}/unity-license"
+      - uses: buildalon/unity-action@v4
         name: ${{ matrix.build-target }}-Validate
         with:
           log-name: ${{ matrix.build-target }}-Validate
-          args: -quit -nographics -batchmode -executeMethod Utilities.Editor.BuildPipeline.UnityPlayerBuildTools.ValidateProject -importTMProEssentialsAsset
-      - uses: buildalon/unity-action@main
+          args: -quit -executeMethod Utilities.Editor.BuildPipeline.UnityPlayerBuildTools.ValidateProject -importTMProEssentialsAsset
+      - uses: buildalon/unity-action@v4
         name: ${{ matrix.build-target }}-Test
         with:
           log-name: ${{ matrix.build-target }}-Test
           build-target: ${{ matrix.build-target }}
-          args: -nographics -batchmode -runTests -testPlatform EditMode -testResults "${{ github.workspace }}/Logs/${{ matrix.build-target }}-results.xml"
-      - uses: actions/upload-artifact@v4
+          args: -runTests -testPlatform EditMode -testResults "${{ github.workspace }}/Logs/${{ matrix.build-target }}-results.xml"
+      - uses: actions/upload-artifact@v7
         if: success() || failure()
         with:
           compression-level: 0
           retention-days: 1
-          name: '${{ github.run_number }}.${{ github.run_attempt }}-${{ matrix.os }}-${{ matrix.unity-version }}-${{ matrix.build-target }}-Artifacts'
+          name: ${{ github.run_number }}.${{ github.run_attempt }}-${{ matrix.os }}-${{ matrix.unity-version }}-${{ matrix.build-target }}-Artifacts
           path: |
             ${{ github.workspace }}/**/*.log
       - uses: ./ # buildalon/unity-test-summary
         if: success() || failure()
         with:
           test-results: ${{ github.workspace }}/Logs/*-results.xml
+          check-name: Unity Test Results ${{ matrix.os }} ${{ matrix.unity-version }}
