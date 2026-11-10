@@ -1,12 +1,24 @@
 name: Buildalon unity-test-summary
-description: 'A GitHub action to gather and display Unit Tests from the Unity Game Engine.'
+description: A GitHub action to gather and display Unit Tests from the Unity Game Engine in the workflow summary.
 branding:
   icon: list
   color: red
 inputs:
   test-results:
-    description: 'The path to the test results file(s).'
+    description: The path to the test results file(s).
     required: true
+  github-token:
+    description: 'The token that posts a check run for each test run. It needs the checks write permission. Without it, as on pull requests from forks, the action warns and still writes the job summary.'
+    required: false
+    default: ${{ github.token }}
+  check-name:
+    description: The name of the check runs, followed by each test results file name. Set it per matrix row so rows do not share check names.
+    required: false
+    default: Unity Test Results
+  pull-request-comment:
+    description: 'Whether to comment the counts of each test run on the pull request, updating the comment on later runs. It needs the pull-requests write permission.'
+    required: false
+    default: 'false'
 runs:
   using: node24
   main: dist/index.js
