@@ -119,6 +119,7 @@ async function postCheckRuns(summaries: TestRunSummary[]) {
   const token = core.getInput('github-token');
   if (!token) {
     core.info('No github-token, so no check runs are posted.');
+    summaries.forEach(annotateJob);
     return;
   }
   const context = github.context;
@@ -152,13 +153,26 @@ async function postCheckRuns(summaries: TestRunSummary[]) {
     } catch (error) {
       if (isPermissionError(error)) {
         core.warning(`Could not post check runs: the github-token needs \`checks: write\` permission, which pull requests from forks never get. The job summary still has the results. (${error.message})`);
+        summaries.slice(summaries.indexOf(summary)).forEach(annotateJob);
         return;
       }
       core.warning(`Could not post check run "${name}": ${error.message}`);
+      annotateJob(summary);
     }
     if (pullRequestComment) {
       pullRequestComment = await postPullRequestComment(octokit, owner, repo, name, getLongSummary(summary.stats, checkUrl, headSha));
     }
+  }
+}
+
+/**
+ * Annotates the job with each failure of a test run whose check run could not be posted, so the failures still
+ * show; a posted check run carries them already.
+ */
+function annotateJob(summary: TestRunSummary) {
+  for (const failure of summary.failures) {
+    const filePath = failure.file && failure.line > 0 ? toRepoPath(failure.file, env['UNITY_PROJECT_PATH'], env['GITHUB_WORKSPACE']) : undefined;
+    core.error(failure.message || 'Test failed', filePath ? { title: failure.name, file: filePath, startLine: failure.line } : { title: failure.name });
   }
 }
 
@@ -350,14 +364,6 @@ function getTestCaseDetails(testCase: any, failures: TestFailure[]): TestCaseSec
     ], fileLinkContext);
     if (links) {
       details += `\n${links}`;
-    }
-    // annotate failed test cases with the error message
-    const filePath = location ? toRepoPath(location.file, env['UNITY_PROJECT_PATH'], env['GITHUB_WORKSPACE']) : undefined;
-    core.debug(`failure location: ${location?.file}:${location?.line} -> ${filePath}`);
-    if (filePath) {
-      core.error(testFailure.message || 'Test failed', { title: testCaseFullName, file: filePath, startLine: location.line });
-    } else {
-      core.error(testFailure.message || 'Test failed', { title: testCaseFullName });
     }
   }
   const outputLines = parseLogs(output);

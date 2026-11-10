@@ -45311,6 +45311,7 @@ async function postCheckRuns(summaries) {
     const token = getInput('github-token');
     if (!token) {
         info('No github-token, so no check runs are posted.');
+        summaries.forEach(annotateJob);
         return;
     }
     const context = github_context;
@@ -45344,13 +45345,21 @@ async function postCheckRuns(summaries) {
         catch (error) {
             if (isPermissionError(error)) {
                 warning(`Could not post check runs: the github-token needs \`checks: write\` permission, which pull requests from forks never get. The job summary still has the results. (${error.message})`);
+                summaries.slice(summaries.indexOf(summary)).forEach(annotateJob);
                 return;
             }
             warning(`Could not post check run "${name}": ${error.message}`);
+            annotateJob(summary);
         }
         if (pullRequestComment) {
             pullRequestComment = await postPullRequestComment(octokit, owner, repo, name, getLongSummary(summary.stats, checkUrl, headSha));
         }
+    }
+}
+function annotateJob(summary) {
+    for (const failure of summary.failures) {
+        const filePath = failure.file && failure.line > 0 ? toRepoPath(failure.file, external_process_namespaceObject.env['UNITY_PROJECT_PATH'], external_process_namespaceObject.env['GITHUB_WORKSPACE']) : undefined;
+        core_error(failure.message || 'Test failed', filePath ? { title: failure.name, file: filePath, startLine: failure.line } : { title: failure.name });
     }
 }
 async function postPullRequestComment(octokit, owner, repo, name, summary) {
@@ -45517,14 +45526,6 @@ function getTestCaseDetails(testCase, failures) {
         ], fileLinkContext);
         if (links) {
             details += `\n${links}`;
-        }
-        const filePath = location ? toRepoPath(location.file, external_process_namespaceObject.env['UNITY_PROJECT_PATH'], external_process_namespaceObject.env['GITHUB_WORKSPACE']) : undefined;
-        core_debug(`failure location: ${location === null || location === void 0 ? void 0 : location.file}:${location === null || location === void 0 ? void 0 : location.line} -> ${filePath}`);
-        if (filePath) {
-            core_error(testFailure.message || 'Test failed', { title: testCaseFullName, file: filePath, startLine: location.line });
-        }
-        else {
-            core_error(testFailure.message || 'Test failed', { title: testCaseFullName });
         }
     }
     const outputLines = parseLogs(output);
